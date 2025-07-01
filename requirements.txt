@@ -1,0 +1,4 @@
+# Telegram client library for Python
+telethon
+# Cryptographic library for faster encryption (optional but recommended for telethon), 20x faster
+cryptg
