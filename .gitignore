@@ -1,3 +1,4 @@
 media*/
 messages*.json
 session*.session
+config.json
