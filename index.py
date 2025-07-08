@@ -63,13 +63,9 @@ async def handle_message(_, msg, is_comment=False):
             rec["reactions"].append(
                 {
                     "reaction": (
-                        "Paid emoji"
-                        if type(reaction.reaction).__name__ == "ReactionPaid"
-                        else (
-                            "Custom emoji"
-                            if type(reaction.reaction).__name__ == "ReactionCustomEmoji"
-                            else reaction.reaction.emoticon
-                        )
+                        reaction.reaction.emoticon
+                        if hasattr(reaction.reaction, "emoticon")
+                        else type(reaction.reaction).__name__
                     ),
                     "count": reaction.count,
                 }
@@ -93,7 +89,7 @@ async def handle_message(_, msg, is_comment=False):
             elif media_type != "MessageMediaWebPage":
                 path = await msg.download_media(file=folder)
                 rel_path = os.path.relpath(path)
-                rec["media"] = [{"media_type": media_type, "media_path": rel_path}]
+                rec["media"] = [rel_path]
 
     return rec
 

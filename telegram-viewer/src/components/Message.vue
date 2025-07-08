@@ -11,20 +11,16 @@ const isAnonymous = (msg: TelegramMessage) => {
   return !msg.username && !msg.first_name && !msg.last_name;
 };
 
-const getMediaUrl = (mediaPath: string) => {
-  return props.server + mediaPath.replace(/\\/g, "/");
+const getMediaUrl = (media: string) => {
+  return props.server + media.replace(/\\/g, "/");
 };
 
-const getMediaType = (media: MediaItem) => {
-  const type = media.media_type.toLowerCase();
-  const path = media.media_path.toLowerCase();
+const getMediaType = (media: string) => {
+  const path = media.toLowerCase();
 
-  if (type.includes("photo") || path.match(/\.(jpg|jpeg|png|gif|webp)$/))
-    return "image";
-  if (type.includes("video") || path.match(/\.(mp4|webm|mov|avi|mkv)$/))
-    return "video";
-  if (type.includes("audio") || path.match(/\.(mp3|wav|ogg|m4a|flac)$/))
-    return "audio";
+  if (path.match(/\.(jpg|jpeg|png|gif|webp)$/)) return "image";
+  if (path.match(/\.(mp4|webm|mov|avi|mkv)$/)) return "video";
+  if (path.match(/\.(mp3|wav|ogg|m4a|flac)$/)) return "audio";
   return "file";
 };
 
@@ -175,15 +171,15 @@ const formatFileSize = (path: string) => {
     >
       <div
         v-for="media in props.message.media"
-        :key="media.media_path"
+        :key="media"
         :class="props.isComment ? 'comment-media-item' : 'media-item'"
       >
         <!-- Image -->
         <img
           v-if="getMediaType(media) === 'image'"
           v-viewport-load
-          :data-src="getMediaUrl(media.media_path)"
-          :alt="media.media_path"
+          :data-src="getMediaUrl(media)"
+          :alt="media"
           :class="props.isComment ? 'comment-media-image' : 'media-image'"
         />
 
@@ -191,7 +187,7 @@ const formatFileSize = (path: string) => {
         <video
           v-else-if="getMediaType(media) === 'video'"
           v-viewport-load
-          :data-src="getMediaUrl(media.media_path)"
+          :data-src="getMediaUrl(media)"
           controls
           :class="props.isComment ? 'comment-media-video' : 'media-video'"
         ></video>
@@ -200,7 +196,7 @@ const formatFileSize = (path: string) => {
         <audio
           v-else-if="getMediaType(media) === 'audio'"
           v-viewport-load
-          :data-src="getMediaUrl(media.media_path)"
+          :data-src="getMediaUrl(media)"
           controls
           :class="props.isComment ? 'comment-media-audio' : 'media-audio'"
         ></audio>
@@ -210,14 +206,10 @@ const formatFileSize = (path: string) => {
           v-else
           :class="props.isComment ? 'comment-media-file' : 'media-file'"
         >
-          <a
-            :href="getMediaUrl(media.media_path)"
-            target="_blank"
-            class="file-link"
-          >
-            📎 {{ formatFileSize(media.media_path) }}
+          <a :href="getMediaUrl(media)" target="_blank" class="file-link">
+            📎 {{ formatFileSize(media) }}
           </a>
-          <span class="media-type-label">{{ media.media_type }}</span>
+          <span class="media-type-label">{{ getMediaType(media) }}</span>
         </div>
       </div>
     </div>

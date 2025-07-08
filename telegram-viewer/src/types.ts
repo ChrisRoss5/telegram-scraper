@@ -10,11 +10,6 @@ declare global {
     id?: number;
   }
 
-  interface MediaItem {
-    media_type: string;
-    media_path: string;
-  }
-
   interface Poll {
     question: string;
     answers: string[];
@@ -36,7 +31,7 @@ declare global {
     reactions?: Reaction[];
     views?: number; // only for non-comment messages
     forwards?: number; // only for non-comment messages
-    media?: MediaItem[];
+    media?: string[];
     poll?: Poll;
     comments?: TelegramMessage[]; // only for root messages
   }
