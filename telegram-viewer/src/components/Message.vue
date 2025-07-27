@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref } from "vue";
+import ImageModal from "./ImageModal.vue";
+
 interface Props {
   message: TelegramMessage;
   server: string;
@@ -7,8 +10,23 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Modal state
+const isModalOpen = ref(false);
+const modalImageSrc = ref("");
+const modalImageAlt = ref("");
+
+const openImageModal = (src: string, alt: string) => {
+  modalImageSrc.value = src;
+  modalImageAlt.value = alt;
+  isModalOpen.value = true;
+};
+
+const closeImageModal = () => {
+  isModalOpen.value = false;
+};
+
 const isAnonymous = (msg: TelegramMessage) => {
-  return !msg.username && !msg.first_name && !msg.last_name;
+  return !msg.sender_id;
 };
 
 const getMediaUrl = (media: string) => {
@@ -108,7 +126,7 @@ const formatFileSize = (path: string) => {
             : 'translation-separator'
         "
       />
-      <div>{{ props.message.message }}</div>
+      <div>{{ props.message.message_translated || props.message.message }}</div>
     </div>
 
     <!-- Poll -->
@@ -181,6 +199,8 @@ const formatFileSize = (path: string) => {
           :data-src="getMediaUrl(media)"
           :alt="media"
           :class="props.isComment ? 'comment-media-image' : 'media-image'"
+          @click="openImageModal(getMediaUrl(media), media)"
+          style="cursor: pointer"
         />
 
         <!-- Video -->
@@ -272,6 +292,14 @@ const formatFileSize = (path: string) => {
         />
       </div>
     </details>
+
+    <!-- Image Modal -->
+    <ImageModal
+      :src="modalImageSrc"
+      :alt="modalImageAlt"
+      :is-open="isModalOpen"
+      @close="closeImageModal"
+    />
   </article>
 </template>
 

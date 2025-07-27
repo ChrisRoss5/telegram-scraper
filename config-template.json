@@ -4,5 +4,8 @@
   "channel_username": "",
   "output_json": "",
   "media_folder": "",
-  "media_comments_folder": ""
+  "media_comments_folder": "",
+  "date_format": "%d.%m.%Y. %H:%M:%S",
+  "transliterate_key": false,
+  "transliterate_schema": ""
 }

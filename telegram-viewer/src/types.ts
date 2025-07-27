@@ -28,6 +28,7 @@ declare global {
     last_name?: string;
     username?: string;
     message?: string;
+    message_translated?: string;
     reactions?: Reaction[];
     views?: number; // only for non-comment messages
     forwards?: number; // only for non-comment messages

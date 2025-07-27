@@ -3,12 +3,23 @@ import json
 import asyncio
 from telethon import TelegramClient
 from datetime import timedelta
+import iuliia
 
 with open("config.json", "r", encoding="utf-8") as f:
     c = json.load(f)
 
 os.makedirs(c["media_folder"], exist_ok=True)
 os.makedirs(c["media_comments_folder"], exist_ok=True)
+
+transliteration_schema = None
+if c.get("transliterate_key") and c.get("transliterate_schema"):
+    transliteration_schema = iuliia.schemas.get(c["transliterate_schema"])
+
+
+def transliterate_text(text: str) -> str:
+    if not transliteration_schema or not text:
+        return ""
+    return transliteration_schema.translate(text).replace("X", "H").replace("x", "h")
 
 
 async def handle_message(_, msg, is_comment=False):
@@ -49,6 +60,10 @@ async def handle_message(_, msg, is_comment=False):
         rec["username"] = username
     if msg.message:
         rec["message"] = msg.message
+        if c.get("transliterate_key"):
+            transliterated = transliterate_text(msg.message)
+            if transliterated:
+                rec[c["transliterate_key"]] = transliterated
 
     rec["reactions"] = []
 
@@ -157,8 +172,9 @@ async def list_channels(client):
 
 
 def format_date(date):
-    # This works reliably for Moscow since 2014, no DST
-    return (date + timedelta(hours=3)).strftime("%d.%m.%Y. %H:%M:%S")
+    return (date + timedelta(hours=c["timezone_offset_hours"])).strftime(
+        c["date_format"]
+    )
 
 
 if __name__ == "__main__":
