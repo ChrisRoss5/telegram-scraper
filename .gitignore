@@ -2,3 +2,9 @@ media*/
 messages*.json
 session*.session
 config.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
