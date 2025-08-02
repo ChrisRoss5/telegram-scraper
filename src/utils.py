@@ -61,3 +61,14 @@ def setup_directories(media_folder, media_comments_folder, base_dir=None):
 
     os.makedirs(media_folder, exist_ok=True)
     os.makedirs(media_comments_folder, exist_ok=True)
+
+
+def send_windows_notification(title, message):
+    """Sends a native Windows 11 toast notification."""
+    try:
+        import win11toast
+
+        win11toast.notify(title, message, duration="long")
+        print("Sent crash notification to Windows.")
+    except Exception as notify_error:
+        print(f"Failed to send Windows notification: {notify_error}")

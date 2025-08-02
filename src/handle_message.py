@@ -1,10 +1,9 @@
 import os
 from .utils import format_date, transliterate_text
+from . import globals as g
 
 
-async def handle_message(
-    client, msg, config, transliteration_schema, is_comment=False, base_dir=None
-):
+async def handle_message(msg, is_comment=False):
     """Handle processing of a single message"""
     sender_id = msg.sender_id or None
     first_name = getattr(msg.sender, "first_name", None) if msg.sender else None
@@ -14,7 +13,7 @@ async def handle_message(
     rec = {
         "id": msg.id,
         "date": format_date(
-            msg.date, config["timezone_offset_hours"], config["date_format"]
+            msg.date, g.config["timezone_offset_hours"], g.config["date_format"]
         ),
     }
 
@@ -45,10 +44,10 @@ async def handle_message(
         rec["username"] = username
     if msg.message:
         rec["message"] = msg.message
-        if config.get("transliterate_key"):
-            transliterated = transliterate_text(msg.message, transliteration_schema)
+        if g.config.get("transliterate_key"):
+            transliterated = transliterate_text(msg.message, g.transliteration_schema)
             if transliterated:
-                rec[config["transliterate_key"]] = transliterated
+                rec[g.config["transliterate_key"]] = transliterated
 
     rec["reactions"] = []
 
@@ -74,15 +73,15 @@ async def handle_message(
         del rec["reactions"]
 
     if msg.media:
-        if not is_comment or not sender_id or username == config["channel_username"]:
+        if not is_comment or not sender_id or username == g.config["channel_username"]:
             folder = (
-                config["media_comments_folder"]
+                g.config["media_comments_folder"]
                 if is_comment
-                else config["media_folder"]
+                else g.config["media_folder"]
             )
             # Make folder path absolute relative to base_dir if provided
-            if base_dir:
-                folder = os.path.join(base_dir, folder)
+            if g.base_dir:
+                folder = os.path.join(g.base_dir, folder)
 
             media_type = type(msg.media).__name__
             if media_type == "MessageMediaPoll":
@@ -96,8 +95,8 @@ async def handle_message(
                 }
             elif media_type != "MessageMediaWebPage":
                 path = await msg.download_media(file=folder)
-                if base_dir:
-                    rel_path = os.path.relpath(path, base_dir)
+                if g.base_dir:
+                    rel_path = os.path.relpath(path, g.base_dir)
                 else:
                     rel_path = os.path.relpath(path)
                 rec["media"] = [rel_path]
