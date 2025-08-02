@@ -6,7 +6,10 @@ import iuliia
 
 def load_config():
     """Load configuration from config.json"""
-    with open("config.json", "r", encoding="utf-8") as f:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    config_path = os.path.join(project_root, "config.json")
+    with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -50,7 +53,11 @@ def format_date(date, timezone_offset_hours, date_format):
     return (date + timedelta(hours=timezone_offset_hours)).strftime(date_format)
 
 
-def setup_directories(media_folder, media_comments_folder):
-    """Create necessary directories"""
+def setup_directories(media_folder, media_comments_folder, base_dir=None):
+    """Create necessary directories relative to base_dir (or current working directory if None)"""
+    if base_dir:
+        media_folder = os.path.join(base_dir, media_folder)
+        media_comments_folder = os.path.join(base_dir, media_comments_folder)
+
     os.makedirs(media_folder, exist_ok=True)
     os.makedirs(media_comments_folder, exist_ok=True)

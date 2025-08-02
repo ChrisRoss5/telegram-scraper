@@ -2,7 +2,7 @@
 import rawMessages from "@root/messages.json";
 import Message from "./components/Message.vue";
 
-const server = "http://127.0.0.1:5500/";
+const server = "http://127.0.0.1:5500/telegram-scraper/";
 
 const w = window as any;
 const m = rawMessages as TelegramMessage[];

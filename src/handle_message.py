@@ -2,7 +2,9 @@ import os
 from .utils import format_date, transliterate_text
 
 
-async def handle_message(client, msg, config, transliteration_schema, is_comment=False):
+async def handle_message(
+    client, msg, config, transliteration_schema, is_comment=False, base_dir=None
+):
     """Handle processing of a single message"""
     sender_id = msg.sender_id or None
     first_name = getattr(msg.sender, "first_name", None) if msg.sender else None
@@ -78,6 +80,10 @@ async def handle_message(client, msg, config, transliteration_schema, is_comment
                 if is_comment
                 else config["media_folder"]
             )
+            # Make folder path absolute relative to base_dir if provided
+            if base_dir:
+                folder = os.path.join(base_dir, folder)
+
             media_type = type(msg.media).__name__
             if media_type == "MessageMediaPoll":
                 rec["poll"] = {
@@ -90,7 +96,10 @@ async def handle_message(client, msg, config, transliteration_schema, is_comment
                 }
             elif media_type != "MessageMediaWebPage":
                 path = await msg.download_media(file=folder)
-                rel_path = os.path.relpath(path)
+                if base_dir:
+                    rel_path = os.path.relpath(path, base_dir)
+                else:
+                    rel_path = os.path.relpath(path)
                 rec["media"] = [rel_path]
 
     return rec
