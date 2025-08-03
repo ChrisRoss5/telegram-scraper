@@ -10,6 +10,8 @@ class MessageProcessor:
         self.output_json_path = output_json_path
         self.last_grouped_id = -1
         self._message_index = self._build_message_index()
+        self._processed_grouped_messages = set()  # Track processed grouped message IDs
+        self._initialize_processed_grouped_messages()  # Initialize from existing data
 
     def _build_message_index(self):
         """Build an index of messages by their ID for quick lookup"""
@@ -17,6 +19,18 @@ class MessageProcessor:
         for i, message in enumerate(self.all_messages):
             index[message["id"]] = i
         return index
+
+    def _initialize_processed_grouped_messages(self):
+        """Initialize the set of processed grouped messages from existing data"""
+        # Look through existing messages to find those that have multiple media items
+        # and estimate which message IDs were likely grouped together
+        for msg in self.all_messages:
+            media_list = msg.get("media", [])
+            if len(media_list) > 1:
+                # This message likely contains grouped media
+                # The subsequent message IDs (msg.id + 1, msg.id + 2, etc.) were probably grouped
+                for i in range(1, len(media_list)):
+                    self._processed_grouped_messages.add(msg["id"] + i)
 
     def _get_next_message_version(self, existing_message):
         """Get the next version number for a message"""
@@ -128,10 +142,20 @@ class MessageProcessor:
             if self.all_messages and "media" in self.all_messages[-1]:
                 self.all_messages[-1]["media"].append(root_rec["media"][0])
             self.last_grouped_id = msg.grouped_id
+            # Track this message as part of a processed group
+            self._processed_grouped_messages.add(msg.id)
             return True
         else:
             self.last_grouped_id = msg.grouped_id if msg.grouped_id is not None else -1
             return False
+
+    def _should_skip_grouped_message(self, msg):
+        """Check if this grouped message should be skipped because it's already part of an existing group"""
+        if not msg.grouped_id:
+            return False
+
+        # If this message ID has already been processed as part of a group, skip it
+        return msg.id in self._processed_grouped_messages
 
     def process_new_message(self, root_rec, msg):
         """Process a new message and handle grouping logic"""
@@ -153,6 +177,13 @@ class MessageProcessor:
 
     async def process_message_with_comments(self, client, msg, channel_username):
         """Process a message and its comments for historical sync"""
+        # Check if this is a grouped message that should be skipped
+        if self._should_skip_grouped_message(msg):
+            print(
+                f"Skipping grouped message {msg.id} (part of existing group {msg.grouped_id})"
+            )
+            return None
+
         # Check if message already exists
         existing_index, existing_message = self.find_existing_message(msg.id)
 

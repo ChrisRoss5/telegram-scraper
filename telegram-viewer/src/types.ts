@@ -2,6 +2,7 @@ declare global {
   interface Reaction {
     reaction: string;
     count: number;
+    is_from_creator?: boolean;
   }
 
   interface ForwardInfo {

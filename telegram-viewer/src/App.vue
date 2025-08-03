@@ -17,6 +17,7 @@ console.log(
   m.filter((m) => m.message && m.media).length
 );
 console.log("Messages with polls:", m.filter((m) => m.poll).length);
+console.log("Total comments:", m.flatMap((m) => m.comments || []).length);
 
 w.m = m;
 w.m2 = m

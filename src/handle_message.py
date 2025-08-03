@@ -1,6 +1,14 @@
 import os
 from .utils import format_date, transliterate_text
 from . import globals as g
+from telethon.tl.functions.messages import GetMessageReactionsListRequest
+
+
+def get_reaction_key(reaction):
+    """Extract reaction identifier from a reaction object"""
+    return (
+        reaction.emoticon if hasattr(reaction, "emoticon") else type(reaction).__name__
+    )
 
 
 async def handle_message(msg, is_comment=False, skip_media_download=False):
@@ -9,6 +17,7 @@ async def handle_message(msg, is_comment=False, skip_media_download=False):
     first_name = getattr(msg.sender, "first_name", None) if msg.sender else None
     last_name = getattr(msg.sender, "last_name", None) if msg.sender else None
     username = getattr(msg.sender, "username", None) if msg.sender else None
+    sender_is_creator = not sender_id or username == g.config["channel_username"]
 
     rec = {
         "id": msg.id,
@@ -58,22 +67,33 @@ async def handle_message(msg, is_comment=False, skip_media_download=False):
             rec["forwards"] = msg.forwards
 
     if msg.reactions:
-        for reaction in msg.reactions.results:
-            rec["reactions"].append(
-                {
-                    "reaction": (
-                        reaction.reaction.emoticon
-                        if hasattr(reaction.reaction, "emoticon")
-                        else type(reaction.reaction).__name__
-                    ),
-                    "count": reaction.count,
-                }
+        creator_reactions = set()
+
+        if is_comment:
+            all_reactions = await g.client(
+                GetMessageReactionsListRequest(peer=msg.peer_id, id=msg.id, limit=100)
             )
+            for reaction_peer in all_reactions.reactions:
+                # Check if the reaction is from the channel itself
+                if (
+                    hasattr(reaction_peer.peer_id, "channel_id")
+                    and reaction_peer.peer_id.channel_id == msg.peer_id.channel_id
+                ):
+                    creator_reactions.add(get_reaction_key(reaction_peer.reaction))
+
+        for reaction in msg.reactions.results:
+            r = {
+                "reaction": get_reaction_key(reaction.reaction),
+                "count": reaction.count,
+            }
+            if r["reaction"] in creator_reactions:
+                r["is_from_creator"] = True
+            rec["reactions"].append(r)
     else:
         del rec["reactions"]
 
     if msg.media:
-        if not is_comment or not sender_id or username == g.config["channel_username"]:
+        if not is_comment or sender_is_creator:
             folder = (
                 g.config["media_comments_folder"]
                 if is_comment
@@ -94,11 +114,13 @@ async def handle_message(msg, is_comment=False, skip_media_download=False):
                     "total_voters": msg.media.results.total_voters,
                 }
             elif media_type != "MessageMediaWebPage" and not skip_media_download:
+                print(f"Downloading {media_type} media...")
                 path = await msg.download_media(file=folder)
                 if g.base_dir:
                     rel_path = os.path.relpath(path, g.base_dir)
                 else:
                     rel_path = os.path.relpath(path)
                 rec["media"] = [rel_path]
+                print(f"Downloaded media to {rel_path}")
 
     return rec
