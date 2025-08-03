@@ -3,7 +3,7 @@ from .utils import format_date, transliterate_text
 from . import globals as g
 
 
-async def handle_message(msg, is_comment=False):
+async def handle_message(msg, is_comment=False, skip_media_download=False):
     """Handle processing of a single message"""
     sender_id = msg.sender_id or None
     first_name = getattr(msg.sender, "first_name", None) if msg.sender else None
@@ -93,7 +93,7 @@ async def handle_message(msg, is_comment=False):
                     ],
                     "total_voters": msg.media.results.total_voters,
                 }
-            elif media_type != "MessageMediaWebPage":
+            elif media_type != "MessageMediaWebPage" and not skip_media_download:
                 path = await msg.download_media(file=folder)
                 if g.base_dir:
                     rel_path = os.path.relpath(path, g.base_dir)

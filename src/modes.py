@@ -14,7 +14,9 @@ class HistoricalSyncMode:
             if self.message_processor.all_messages:
                 last_message = self.message_processor.all_messages[-1]
                 media_count = len(last_message.get("media", []))
-                default_offset_id = last_message["id"] + media_count - 1
+                if media_count:
+                    media_count -= 1  # Because first message carries media!
+                default_offset_id = last_message["id"] + media_count
         except (IndexError, KeyError):
             default_offset_id = 0
         return default_offset_id
