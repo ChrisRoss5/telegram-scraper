@@ -73,6 +73,8 @@ class TelegramClientManager:
                 else:
                     print("Invalid mode selected. Exiting.")
                     exit(1)
+                print("Client session ended successfully.")
+                exit(0)
         finally:
             if client.is_connected():
                 client.disconnect()

@@ -17,4 +17,9 @@ def create_new_message_handler(message_processor):
             f"Saved new message (ID: {msg.id}). Total messages: {len(message_processor.all_messages)}"
         )
 
+        # Special output line for PowerShell to catch
+        print(
+            f"POWERSHELL_NOTIFICATION:NEW_MESSAGE:{msg.id}:{msg.text[:100] if msg.text else '[Media/No text]'}"
+        )
+
     return new_message_handler

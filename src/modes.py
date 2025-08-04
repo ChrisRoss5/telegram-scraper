@@ -72,7 +72,7 @@ class HistoricalSyncMode:
                 break
 
         print(
-            f"Saved {count} new messages to {output_json_path}, totaling {len(self.message_processor.all_messages)} messages."
+            f"Saved {count - 1} new messages to {output_json_path}, totaling {len(self.message_processor.all_messages)} messages."
         )
 
 

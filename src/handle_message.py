@@ -1,7 +1,11 @@
 import os
+
 from .utils import format_date, transliterate_text
 from . import globals as g
 from telethon.tl.functions.messages import GetMessageReactionsListRequest
+
+""" from telethon.utils import get_input_location
+from telethon.tl import types """
 
 
 def get_reaction_key(reaction):
@@ -115,7 +119,39 @@ async def handle_message(msg, is_comment=False, skip_media_download=False):
                 }
             elif media_type != "MessageMediaWebPage" and not skip_media_download:
                 print(f"Downloading {media_type} media...")
-                path = await msg.download_media(file=folder)
+
+                if media_type == "MessageMediaPhoto":
+                    # Sometimes, largest PHOTO resolution is not the default... WTF!
+                    """largest_size = max(
+                        msg.photo.sizes,
+                        key=lambda s: getattr(s, "w", 0) * getattr(s, "h", 0),
+                    )
+                    sorted_by_size = sorted(
+                        msg.photo.sizes,
+                        key=lambda s: getattr(s, "size", 0),
+                    )
+                    largest_idx_in_sorted = sorted_by_size.index(largest_size)"""
+                    # input_location = get_input_location(largest_size)
+                    """ input_location = types.InputPhotoFileLocation(
+                        id=msg.photo.id,
+                        access_hash=msg.photo.access_hash,
+                        file_reference=msg.photo.file_reference,
+                        thumb_size=largest_size.type,  # This correctly uses the 'y' type string
+                    ) """
+                    # path = await msg.client.download_file(input_location, file=folder)
+                    # path = await g.client.download_file()
+                    # path = await msg.download_media(thumb=largest_size, file=folder)
+                    """ path = await msg.client.download_media(
+                        msg.photo, thumb=largest_size, file=folder
+                    ) """
+                    """ path = await msg.download_media(
+                        file=folder, thumb=largest_idx_in_sorted
+                    ) """
+                    # path = await g.client.download_media(largest_size, file=folder)
+                    path = await msg.download_media(file=folder)
+                else:
+                    path = await msg.download_media(file=folder)
+
                 if g.base_dir:
                     rel_path = os.path.relpath(path, g.base_dir)
                 else:
