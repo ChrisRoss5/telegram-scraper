@@ -54,12 +54,25 @@ python index.py --mode realtime --no-prompts
 # Historical sync with specific offset ID
 python index.py --mode historical --offset-id 12345 --no-prompts
 
+# Historical sync starting 100 messages before the latest (negative offset)
+python index.py --mode historical --offset-id -100 --no-prompts
+
 # Historical sync with stop count limit
 python index.py --mode historical --stop-count 100 --no-prompts
 
 # Historical sync with both offset and limit
 python index.py --mode historical --offset-id 12345 --stop-count 100 --no-prompts
+
+# Historical sync starting 50 messages back and processing 25 messages
+python index.py --mode historical --offset-id -50 --stop-count 25 --no-prompts
 ```
+
+#### Understanding Negative Offset IDs
+
+When using negative offset IDs, the scraper calculates the actual starting point relative to the latest known message:
+
+- If your latest message ID is 10000 and you use `--offset-id -100`, the scraper will start from message ID 9900
+- This is useful for re-processing recent messages or catching up on messages you might have missed
 
 ### Command Line Arguments
 
@@ -69,6 +82,9 @@ python index.py --mode historical --offset-id 12345 --stop-count 100 --no-prompt
   - `2` or `realtime`: Real-time Listening mode (default)
 
 - `--offset-id, -o`: Starting message ID for historical sync (default: calculated from last message)
+
+  - Positive values: Start from the specified message ID
+  - Negative values: Start from (default_offset_id + negative_value), e.g., -100 starts 100 messages before the default offset
 
 - `--stop-count, -s`: Maximum number of messages to process in historical sync (default: no limit)
 
@@ -85,6 +101,9 @@ python index.py -n
 
 # Non-interactive historical sync from message ID 5000, process 50 messages
 python index.py -m historical -o 5000 -s 50 -n
+
+# Non-interactive historical sync starting 200 messages before latest
+python index.py -m historical -o -200 -n
 
 # Non-interactive historical sync with defaults
 python index.py -m 1 -n

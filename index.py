@@ -51,7 +51,7 @@ def parse_arguments():
         "--offset-id",
         "-o",
         type=int,
-        help="Starting message ID for historical sync (default: calculated from last message)",
+        help="Starting message ID for historical sync (default: calculated from last message). Use negative values to go back from the default offset (e.g., -100 starts 100 messages before the latest)",
     )
 
     parser.add_argument(

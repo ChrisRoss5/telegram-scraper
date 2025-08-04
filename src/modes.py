@@ -27,11 +27,23 @@ class HistoricalSyncMode:
 
         # Use args if available and no_prompts is set
         if args and args.no_prompts:
-            offset_id = (
-                args.offset_id if args.offset_id is not None else default_offset_id
-            )
+            if args.offset_id is not None:
+                if args.offset_id < 0:
+                    # Handle negative offset: start from default offset minus the absolute value
+                    offset_id = default_offset_id + args.offset_id
+                    if offset_id < 0:
+                        print(f"Warning: Negative offset_id {args.offset_id} results in calculated offset {offset_id} which is less than 0. Using 0 instead.")
+                        offset_id = 0
+                    else:
+                        print(f"Using negative offset_id: {args.offset_id} (calculated as {default_offset_id} + {args.offset_id} = {offset_id})")
+                else:
+                    offset_id = args.offset_id
+                    print(f"Using offset_id: {offset_id}")
+            else:
+                offset_id = default_offset_id
+                print(f"Using default offset_id: {offset_id}")
+
             stop_count = args.stop_count
-            print(f"Using offset_id: {offset_id}")
             if stop_count:
                 print(f"Using stop_count: {stop_count}")
             else:
@@ -40,9 +52,22 @@ class HistoricalSyncMode:
 
         # Interactive mode
         offset_input = input(
-            f"Enter offset_id (default: {default_offset_id}): "
+            f"Enter offset_id (default: {default_offset_id}, negative values go back from default): "
         ).strip()
-        offset_id = int(offset_input) if offset_input else default_offset_id
+
+        if offset_input:
+            offset_id = int(offset_input)
+            if offset_id < 0:
+                # Handle negative offset: start from default offset minus the absolute value
+                actual_offset_id = default_offset_id + offset_id
+                if actual_offset_id < 0:
+                    print(f"Warning: Negative offset_id {offset_id} results in calculated offset {actual_offset_id} which is less than 0. Using 0 instead.")
+                    offset_id = 0
+                else:
+                    print(f"Negative offset detected: {offset_id} calculated as {default_offset_id} + {offset_id} = {actual_offset_id}")
+                    offset_id = actual_offset_id
+        else:
+            offset_id = default_offset_id
 
         stop_input = input("Enter stop_count (leave empty for no limit): ").strip()
         stop_count = int(stop_input) if stop_input else None

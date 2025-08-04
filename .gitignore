@@ -3,7 +3,9 @@
 
 *message*.json
 session*.session*
-config.json
+session*.lock
+config*.json
+!config-template.json
 
 # Python cache
 __pycache__/
