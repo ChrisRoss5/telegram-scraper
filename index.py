@@ -1,4 +1,5 @@
 import asyncio
+import argparse
 import os
 from src.utils import (
     load_config,
@@ -19,7 +20,7 @@ output_json_path = os.path.join(current_dir, c["output_json"])
 all_messages = load_messages(output_json_path)
 
 
-async def main():
+async def main(args=None):
     setup_directories(c["media_folder"], c["media_comments_folder"], current_dir)
 
     # Initialize message processor and client manager
@@ -29,8 +30,47 @@ async def main():
     )
 
     # Run with automatic reconnection
-    await client_manager.run_with_reconnection(output_json_path)
+    await client_manager.run_with_reconnection(output_json_path, args)
+
+
+def parse_arguments():
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(
+        description="Telegram Scraper - Download messages and media from Telegram channels"
+    )
+
+    parser.add_argument(
+        "--mode",
+        "-m",
+        choices=["1", "2", "historical", "realtime"],
+        default="2",
+        help="Operating mode: 1/historical = Historical Sync, 2/realtime = Real-time Listening (default: 2)",
+    )
+
+    parser.add_argument(
+        "--offset-id",
+        "-o",
+        type=int,
+        help="Starting message ID for historical sync (default: calculated from last message)",
+    )
+
+    parser.add_argument(
+        "--stop-count",
+        "-s",
+        type=int,
+        help="Maximum number of messages to process in historical sync (default: no limit)",
+    )
+
+    parser.add_argument(
+        "--no-prompts",
+        "-n",
+        action="store_true",
+        help="Run without interactive prompts (use defaults or provided flags)",
+    )
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    args = parse_arguments()
+    asyncio.run(main(args))

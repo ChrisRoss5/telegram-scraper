@@ -31,6 +31,68 @@ A Python script to scrape messages, media, and comments from a specific Telegram
    python index.py
    ```
 
+## Command Line Options
+
+The Telegram Scraper supports command-line flags to run without interactive prompts.
+
+### Basic Usage
+
+```bash
+# Run with default settings (real-time mode)
+python index.py
+
+# Run in historical sync mode without prompts
+python index.py --mode historical --no-prompts
+
+# Run in real-time mode without prompts
+python index.py --mode realtime --no-prompts
+```
+
+### Historical Sync Mode Options
+
+```bash
+# Historical sync with specific offset ID
+python index.py --mode historical --offset-id 12345 --no-prompts
+
+# Historical sync with stop count limit
+python index.py --mode historical --stop-count 100 --no-prompts
+
+# Historical sync with both offset and limit
+python index.py --mode historical --offset-id 12345 --stop-count 100 --no-prompts
+```
+
+### Command Line Arguments
+
+- `--mode, -m`: Operating mode
+
+  - `1` or `historical`: Historical Sync mode
+  - `2` or `realtime`: Real-time Listening mode (default)
+
+- `--offset-id, -o`: Starting message ID for historical sync (default: calculated from last message)
+
+- `--stop-count, -s`: Maximum number of messages to process in historical sync (default: no limit)
+
+- `--no-prompts, -n`: Run without interactive prompts (use defaults or provided flags)
+
+### Usage Examples
+
+```bash
+# Interactive mode (original behavior)
+python index.py
+
+# Non-interactive real-time mode
+python index.py -n
+
+# Non-interactive historical sync from message ID 5000, process 50 messages
+python index.py -m historical -o 5000 -s 50 -n
+
+# Non-interactive historical sync with defaults
+python index.py -m 1 -n
+
+# Get help
+python index.py --help
+```
+
 ## Output
 
 - `messages.json`: Contains all scraped message data

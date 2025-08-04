@@ -21,10 +21,24 @@ class HistoricalSyncMode:
             default_offset_id = 0
         return default_offset_id
 
-    def get_user_input(self):
+    def get_user_input(self, args=None):
         """Get user input for historical sync parameters"""
         default_offset_id = self.get_default_offset_id()
 
+        # Use args if available and no_prompts is set
+        if args and args.no_prompts:
+            offset_id = (
+                args.offset_id if args.offset_id is not None else default_offset_id
+            )
+            stop_count = args.stop_count
+            print(f"Using offset_id: {offset_id}")
+            if stop_count:
+                print(f"Using stop_count: {stop_count}")
+            else:
+                print("No stop_count limit set")
+            return offset_id, stop_count
+
+        # Interactive mode
         offset_input = input(
             f"Enter offset_id (default: {default_offset_id}): "
         ).strip()
@@ -35,10 +49,10 @@ class HistoricalSyncMode:
 
         return offset_id, stop_count
 
-    async def run(self, client, channel_username, output_json_path):
+    async def run(self, client, channel_username, output_json_path, args=None):
         """Run historical sync mode"""
         print("Starting in Historical Sync mode...")
-        offset_id, stop_count = self.get_user_input()
+        offset_id, stop_count = self.get_user_input(args)
         count = 1
 
         async for msg in client.iter_messages(
@@ -71,8 +85,16 @@ class RealTimeMode:
         await client.run_until_disconnected()
 
 
-def get_mode_choice():
+def get_mode_choice(args=None):
     """Get user's choice of operating mode"""
+    if args and args.no_prompts:
+        if args.mode in ["1", "historical"]:
+            return "1"
+        elif args.mode in ["2", "realtime"]:
+            return "2"
+        else:
+            return "2"  # Default to real-time
+
     return (
         input(
             "Choose mode: [1] Historical Sync [2] Real-time Listening (default: 2): "
