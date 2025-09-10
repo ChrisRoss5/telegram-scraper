@@ -32,10 +32,14 @@ class HistoricalSyncMode:
                     # Handle negative offset: start from default offset minus the absolute value
                     offset_id = default_offset_id + args.offset_id
                     if offset_id < 0:
-                        print(f"Warning: Negative offset_id {args.offset_id} results in calculated offset {offset_id} which is less than 0. Using 0 instead.")
+                        print(
+                            f"Warning: Negative offset_id {args.offset_id} results in calculated offset {offset_id} which is less than 0. Using 0 instead."
+                        )
                         offset_id = 0
                     else:
-                        print(f"Using negative offset_id: {args.offset_id} (calculated as {default_offset_id} + {args.offset_id} = {offset_id})")
+                        print(
+                            f"Using negative offset_id: {args.offset_id} (calculated as {default_offset_id} + {args.offset_id} = {offset_id})"
+                        )
                 else:
                     offset_id = args.offset_id
                     print(f"Using offset_id: {offset_id}")
@@ -61,10 +65,14 @@ class HistoricalSyncMode:
                 # Handle negative offset: start from default offset minus the absolute value
                 actual_offset_id = default_offset_id + offset_id
                 if actual_offset_id < 0:
-                    print(f"Warning: Negative offset_id {offset_id} results in calculated offset {actual_offset_id} which is less than 0. Using 0 instead.")
+                    print(
+                        f"Warning: Negative offset_id {offset_id} results in calculated offset {actual_offset_id} which is less than 0. Using 0 instead."
+                    )
                     offset_id = 0
                 else:
-                    print(f"Negative offset detected: {offset_id} calculated as {default_offset_id} + {offset_id} = {actual_offset_id}")
+                    print(
+                        f"Negative offset detected: {offset_id} calculated as {default_offset_id} + {offset_id} = {actual_offset_id}"
+                    )
                     offset_id = actual_offset_id
         else:
             offset_id = default_offset_id
@@ -105,8 +113,11 @@ class RealTimeMode:
     @staticmethod
     async def run(client):
         """Run real-time listening mode"""
-        print("Starting in Real-time Listening mode. Waiting for new messages...")
-        print("Press Ctrl+C to stop.")
+        print(
+            "Starting in Real-time Listening mode. Waiting for new messages...",
+            flush=True,
+        )
+        print("Press Ctrl+C to stop.", flush=True)
         await client.run_until_disconnected()
 
 

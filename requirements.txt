@@ -6,3 +6,5 @@ cryptg
 iuliia
 # Progress bar library
 tqdm
+# Windows 11 toast
+win11toast

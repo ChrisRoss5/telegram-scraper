@@ -1,6 +1,8 @@
 import asyncio
 import argparse
 import os
+import sys
+import io
 from src.utils import (
     load_config,
     setup_transliteration_schema,
@@ -9,6 +11,16 @@ from src.utils import (
 )
 from src.client_manager import TelegramClientManager
 from src.message_processor import MessageProcessor
+
+# Set stdout to handle UTF-8 and flush on newline (line buffering)
+try:
+    sys.stdout = io.TextIOWrapper(
+        sys.stdout.buffer, encoding="utf-8", line_buffering=True
+    )
+except Exception:
+    # In some environments (e.g., debug consoles), stdout may not expose .buffer
+    # Fall back silently; printing will still work with default buffering.
+    pass
 
 # Load configuration and setup
 c = load_config()
